@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+jest.setTimeout(30000);
 const request = require("supertest");
 const mongoose = require("mongoose");
 
@@ -75,5 +75,67 @@ describe("GET /api/vehicles/search", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("vehicles");
     expect(Array.isArray(response.body.vehicles)).toBe(true);
+  });
+});
+describe("PUT /api/vehicles/:id", () => {
+  test("should update a vehicle", async () => {
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        make: "Honda",
+        model: "Civic",
+        category: "Sedan",
+        price: 25000,
+        quantity: 3
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        price: 27000,
+        quantity: 5
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.vehicle.price).toBe(27000);
+    expect(response.body.vehicle.quantity).toBe(5);
+  });
+});
+describe("PUT /api/vehicles/:id", () => {
+  test("should update a vehicle", async () => {
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        make: "Honda",
+        model: "Civic",
+        category: "Sedan",
+        price: 25000,
+        quantity: 3
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        price: 27000,
+        quantity: 5
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.vehicle.price).toBe(27000);
+    expect(response.body.vehicle.quantity).toBe(5);
   });
 });

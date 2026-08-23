@@ -48,6 +48,8 @@ const createVehicle = async (req, res) => {
     });
   }
 };
+
+
 const getVehicles = async (req, res) => {
   try {
     const vehicles = await Vehicle.find({
@@ -64,6 +66,7 @@ const getVehicles = async (req, res) => {
     });
   }
 };
+
 
 const searchVehicles = async (req, res) => {
   try {
@@ -125,8 +128,76 @@ const searchVehicles = async (req, res) => {
     });
   }
 };
+
+
+const updateVehicle = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({
+        message: "Vehicle not found"
+      });
+    }
+
+    const {
+      make,
+      model,
+      category,
+      price,
+      quantity
+    } = req.body;
+
+    if (make !== undefined) {
+      vehicle.make = make;
+    }
+
+    if (model !== undefined) {
+      vehicle.model = model;
+    }
+
+    if (category !== undefined) {
+      vehicle.category = category;
+    }
+
+    if (price !== undefined) {
+      if (price < 0) {
+        return res.status(400).json({
+          message: "Price cannot be negative"
+        });
+      }
+
+      vehicle.price = price;
+    }
+
+    if (quantity !== undefined) {
+      if (quantity < 0) {
+        return res.status(400).json({
+          message: "Quantity cannot be negative"
+        });
+      }
+
+      vehicle.quantity = quantity;
+    }
+
+    await vehicle.save();
+
+    return res.status(200).json({
+      message: "Vehicle updated successfully",
+      vehicle
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to update vehicle",
+      error: error.message
+    });
+  }
+};
+
+
 module.exports = {
   createVehicle,
   getVehicles,
-  searchVehicles
+  searchVehicles,
+  updateVehicle
 };

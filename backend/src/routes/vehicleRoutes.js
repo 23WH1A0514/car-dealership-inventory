@@ -3,7 +3,8 @@ const express = require("express");
 const {
   createVehicle,
   getVehicles,
-  searchVehicles
+  searchVehicles,
+  updateVehicle
 } = require("../controllers/vehicleController");
 
 const {
@@ -17,5 +18,7 @@ router.post("/", protect, createVehicle);
 router.get("/search", searchVehicles);
 
 router.get("/", getVehicles);
+
+router.put("/:id", protect, updateVehicle);
 
 module.exports = router;

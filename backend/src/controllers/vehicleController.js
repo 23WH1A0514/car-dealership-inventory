@@ -48,7 +48,24 @@ const createVehicle = async (req, res) => {
     });
   }
 };
+const getVehicles = async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find({
+      quantity: { $gt: 0 }
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      vehicles
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to fetch vehicles",
+      error: error.message
+    });
+  }
+};
 
 module.exports = {
-  createVehicle
+  createVehicle,
+  getVehicles
 };

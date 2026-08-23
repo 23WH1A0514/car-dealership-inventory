@@ -48,3 +48,13 @@ describe("POST /api/vehicles", () => {
     expect(response.body.vehicle).toHaveProperty("quantity", 5);
   });
 });
+describe("GET /api/vehicles", () => {
+  test("should return all available vehicles", async () => {
+    const response = await request(app)
+      .get("/api/vehicles");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("vehicles");
+    expect(Array.isArray(response.body.vehicles)).toBe(true);
+  });
+});

@@ -2,7 +2,8 @@ const express = require("express");
 
 const {
   createVehicle,
-  getVehicles
+  getVehicles,
+  searchVehicles
 } = require("../controllers/vehicleController");
 
 const {
@@ -12,6 +13,8 @@ const {
 const router = express.Router();
 
 router.post("/", protect, createVehicle);
+
+router.get("/search", searchVehicles);
 
 router.get("/", getVehicles);
 

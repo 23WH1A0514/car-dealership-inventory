@@ -65,7 +65,68 @@ const getVehicles = async (req, res) => {
   }
 };
 
+const searchVehicles = async (req, res) => {
+  try {
+    const {
+      make,
+      model,
+      category,
+      minPrice,
+      maxPrice
+    } = req.query;
+
+    const filter = {
+      quantity: { $gt: 0 }
+    };
+
+    if (make) {
+      filter.make = {
+        $regex: make,
+        $options: "i"
+      };
+    }
+
+    if (model) {
+      filter.model = {
+        $regex: model,
+        $options: "i"
+      };
+    }
+
+    if (category) {
+      filter.category = {
+        $regex: category,
+        $options: "i"
+      };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.price = {};
+
+      if (minPrice !== undefined) {
+        filter.price.$gte = Number(minPrice);
+      }
+
+      if (maxPrice !== undefined) {
+        filter.price.$lte = Number(maxPrice);
+      }
+    }
+
+    const vehicles = await Vehicle.find(filter)
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      vehicles
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to search vehicles",
+      error: error.message
+    });
+  }
+};
 module.exports = {
   createVehicle,
-  getVehicles
+  getVehicles,
+  searchVehicles
 };

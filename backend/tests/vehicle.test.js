@@ -58,3 +58,22 @@ describe("GET /api/vehicles", () => {
     expect(Array.isArray(response.body.vehicles)).toBe(true);
   });
 });
+describe("GET /api/vehicles/search", () => {
+  test("should search vehicles by make", async () => {
+    const response = await request(app)
+      .get("/api/vehicles/search?make=Toyota");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("vehicles");
+    expect(Array.isArray(response.body.vehicles)).toBe(true);
+  });
+
+  test("should search vehicles by price range", async () => {
+    const response = await request(app)
+      .get("/api/vehicles/search?minPrice=20000&maxPrice=50000");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("vehicles");
+    expect(Array.isArray(response.body.vehicles)).toBe(true);
+  });
+});

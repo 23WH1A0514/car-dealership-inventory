@@ -5,7 +5,9 @@ const {
   getVehicles,
   searchVehicles,
   updateVehicle,
-  deleteVehicle
+  deleteVehicle,
+  purchaseVehicle,
+  restockVehicle
 } = require("../controllers/vehicleController");
 
 const {
@@ -25,5 +27,9 @@ router.get("/", getVehicles);
 router.put("/:id", protect, updateVehicle);
 
 router.delete("/:id", protect, admin, deleteVehicle);
+
+router.post("/:id/purchase", protect, purchaseVehicle);
+
+router.post("/:id/restock", protect, admin, restockVehicle);
 
 module.exports = router;

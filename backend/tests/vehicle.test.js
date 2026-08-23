@@ -161,3 +161,139 @@ describe("DELETE /api/vehicles/:id", () => {
     expect(response.statusCode).toBe(403);
   });
 });
+describe("DELETE /api/vehicles/:id - Admin", () => {
+  test("should allow an admin to delete a vehicle", async () => {
+    const adminEmail = `admin${Date.now()}@example.com`;
+
+    const registerResponse = await request(app)
+      .post("/api/auth/register")
+      .send({
+        name: "Admin User",
+        email: adminEmail,
+        password: "Admin123!"
+      });
+
+    expect(registerResponse.statusCode).toBe(201);
+
+    const adminUser = await require("../src/models/User").findOne({
+      email: adminEmail
+    });
+
+    adminUser.role = "admin";
+    await adminUser.save();
+
+    const loginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: adminEmail,
+        password: "Admin123!"
+      });
+
+    expect(loginResponse.statusCode).toBe(200);
+
+    const adminToken = loginResponse.body.token;
+
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        make: "BMW",
+        model: "X5",
+        category: "SUV",
+        price: 60000,
+        quantity: 2
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const deleteResponse = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(deleteResponse.statusCode).toBe(200);
+    expect(deleteResponse.body.message).toBe(
+      "Vehicle deleted successfully"
+    );
+  });
+});
+describe("POST /api/vehicles/:id/purchase", () => {
+  test("should purchase a vehicle and decrease quantity", async () => {
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        make: "Toyota",
+        model: "Fortuner",
+        category: "SUV",
+        price: 45000,
+        quantity: 3
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/purchase`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.vehicle.quantity).toBe(2);
+  });
+
+  test("should reject purchase when quantity is zero", async () => {
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        make: "Tesla",
+        model: "Model 3",
+        category: "Sedan",
+        price: 40000,
+        quantity: 0
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/purchase`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe(
+      "Vehicle is out of stock"
+    );
+  });
+});
+describe("POST /api/vehicles/:id/restock", () => {
+  test("should reject restocking for a non-admin user", async () => {
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        make: "Ford",
+        model: "Endeavour",
+        category: "SUV",
+        price: 50000,
+        quantity: 2
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        quantity: 5
+      });
+
+    expect(response.statusCode).toBe(403);
+  });
+});

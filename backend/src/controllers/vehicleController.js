@@ -214,10 +214,80 @@ const deleteVehicle = async (req, res) => {
     });
   }
 };
+const purchaseVehicle = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({
+        message: "Vehicle not found"
+      });
+    }
+
+    if (vehicle.quantity <= 0) {
+      return res.status(400).json({
+        message: "Vehicle is out of stock"
+      });
+    }
+
+    vehicle.quantity -= 1;
+
+    await vehicle.save();
+
+    return res.status(200).json({
+      message: "Vehicle purchased successfully",
+      vehicle
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to purchase vehicle",
+      error: error.message
+    });
+  }
+};
+const restockVehicle = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) {
+      return res.status(404).json({
+        message: "Vehicle not found"
+      });
+    }
+
+    const { quantity } = req.body;
+
+    if (
+      quantity === undefined ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0
+    ) {
+      return res.status(400).json({
+        message: "Restock quantity must be a positive integer"
+      });
+    }
+
+    vehicle.quantity += quantity;
+
+    await vehicle.save();
+
+    return res.status(200).json({
+      message: "Vehicle restocked successfully",
+      vehicle
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to restock vehicle",
+      error: error.message
+    });
+  }
+};
 module.exports = {
   createVehicle,
   getVehicles,
   searchVehicles,
   updateVehicle,
-  deleteVehicle
+  deleteVehicle,
+  purchaseVehicle,
+  restockVehicle
 };

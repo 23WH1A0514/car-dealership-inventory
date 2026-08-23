@@ -139,3 +139,25 @@ describe("PUT /api/vehicles/:id", () => {
     expect(response.body.vehicle.quantity).toBe(5);
   });
 });
+describe("DELETE /api/vehicles/:id", () => {
+  test("should reject deleting a vehicle for a non-admin user", async () => {
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        make: "Honda",
+        model: "Civic",
+        category: "Sedan",
+        price: 25000,
+        quantity: 3
+      });
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(403);
+  });
+});

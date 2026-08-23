@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
+const vehicleRoutes = require("./routes/vehicleRoutes");
 const { protect } = require("./middleware/authMiddleware");
 
 const app = express();
@@ -16,6 +17,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/vehicles", vehicleRoutes);
 
 app.get(
   "/api/protected-test",

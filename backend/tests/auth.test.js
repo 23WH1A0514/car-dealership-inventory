@@ -132,3 +132,14 @@ describe("POST /api/auth/login", () => {
     expect(response.body.message).toBe("Invalid email or password");
   });
 });
+describe("JWT authentication", () => {
+  test("should reject a request without a token", async () => {
+    const response = await request(app)
+      .get("/api/protected-test");
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe(
+      "Authentication required"
+    );
+  });
+});

@@ -32,3 +32,55 @@ describe("POST /api/auth/register", () => {
     expect(response.body.user).toHaveProperty("email");
   });
 });
+describe("POST /api/auth/login", () => {
+  test("should login an existing user", async () => {
+    const email = `login${Date.now()}@example.com`;
+    const password = "Test@123456";
+
+    await request(app)
+      .post("/api/auth/register")
+      .send({
+        name: "Login User",
+        email,
+        password
+      });
+
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email,
+        password
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body).toHaveProperty("token");
+    expect(response.body.user.email).toBe(email);
+  });
+});
+describe("POST /api/auth/login", () => {
+  test("should login an existing user", async () => {
+    const email = `login${Date.now()}@example.com`;
+    const password = "Test@123456";
+
+    await request(app)
+      .post("/api/auth/register")
+      .send({
+        name: "Login User",
+        email,
+        password
+      });
+
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email,
+        password
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body).toHaveProperty("token");
+    expect(response.body.user.email).toBe(email);
+  });
+});

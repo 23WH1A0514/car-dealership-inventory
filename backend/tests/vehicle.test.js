@@ -297,3 +297,66 @@ describe("POST /api/vehicles/:id/restock", () => {
     expect(response.statusCode).toBe(403);
   });
 });
+describe("POST /api/vehicles/:id/restock - Admin", () => {
+  test("should allow an admin to restock a vehicle", async () => {
+    const adminEmail = `restockadmin${Date.now()}@example.com`;
+
+    const registerResponse = await request(app)
+      .post("/api/auth/register")
+      .send({
+        name: "Restock Admin",
+        email: adminEmail,
+        password: "Admin123!"
+      });
+
+    expect(registerResponse.statusCode).toBe(201);
+
+    const User = require("../src/models/User");
+
+    const adminUser = await User.findOne({
+      email: adminEmail
+    });
+
+    adminUser.role = "admin";
+    await adminUser.save();
+
+    const loginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: adminEmail,
+        password: "Admin123!"
+      });
+
+    expect(loginResponse.statusCode).toBe(200);
+
+    const adminToken = loginResponse.body.token;
+
+    const createResponse = await request(app)
+      .post("/api/vehicles")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        make: "Hyundai",
+        model: "Creta",
+        category: "SUV",
+        price: 30000,
+        quantity: 2
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+
+    const vehicleId = createResponse.body.vehicle._id;
+
+    const response = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        quantity: 5
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.message).toBe(
+      "Vehicle restocked successfully"
+    );
+    expect(response.body.vehicle.quantity).toBe(7);
+  });
+});
